@@ -32,8 +32,8 @@ end
 function asteroidUpdate()
 	--moves bigAsteroid towards player using trigonometry
 	for i,z in ipairs(bigAsteroidTracker) do
-		z.x = z.x + math.cos(enemyToPlayerAngleCalculation(z)) * z.speed * z.direction * dt
-		z.y = z.y + math.sin(enemyToPlayerAngleCalculation(z)) * z.speed * dt
+		z.x = z.x + math.cos(math.random(1,2)) * z.speed * z.direction * dt
+		z.y = z.y + math.sin(math.random(1,2)) * z.speed * dt
 		
 		--stops asteroids from leaving screen
 		if z.x <= 0 or z.x >= love.graphics:getWidth() then
@@ -50,11 +50,11 @@ function asteroidUpdate()
 	--moves smallAsteroid towards player using trigonometry
 	for i,z in ipairs(smallAsteroidTracker) do
 		if z.direction == 1 then
-			z.x = z.x + math.cos(enemyToPlayerAngleCalculation(z)) * z.speed * dt
-			z.y = z.y + math.sin(enemyToPlayerAngleCalculation(z)) * z.speed * dt
+			z.x = z.x + math.cos(math.random(1,2)) * z.speed * dt
+			z.y = z.y + math.sin(math.random(1,2)) * z.speed * dt
 		elseif z.direction == -1 then
-			z.x = z.x + math.cos(enemyToPlayerAngleCalculation(z)) * z.speed * -1 * dt  -- makes the 2nd asteroid move in another direction
-			z.y = z.y + math.sin(enemyToPlayerAngleCalculation(z)) * z.speed * dt
+			z.x = z.x + math.cos(math.random(1,2)) * z.speed * -1 * dt  -- makes the 2nd asteroid move in another direction
+			z.y = z.y + math.sin(math.random(1,2)) * z.speed * dt
 		end
 		
 		--stops asteroids from leaving screen
@@ -130,11 +130,11 @@ end
 function drawAsteroid()
 	--draws bigAsteroids
 	for i, z in ipairs(bigAsteroidTracker) do
-		love.graphics.draw(sprites.asteroid1, z.x, z.y,enemyToPlayerAngleCalculation(z), nil,nil, bigAsteroid.offsetX, bigAsteroid.offsetY)-- z is the current bigAsteroid we are on
+		love.graphics.draw(sprites.asteroid1, z.x, z.y,nil, nil,nil, bigAsteroid.offsetX, bigAsteroid.offsetY)-- z is the current bigAsteroid we are on
 	end
 	
 	--draws smallAsteroids
 	for i, z in ipairs(smallAsteroidTracker) do
-		love.graphics.draw(sprites.asteroid2, z.x, z.y,enemyToPlayerAngleCalculation(z), nil,nil, smallAsteroid.offsetX, smallAsteroid.offsetY)-- z is the current bigAsteroid we are on
+		love.graphics.draw(sprites.asteroid2, z.x, z.y,nil, nil,nil, smallAsteroid.offsetX, smallAsteroid.offsetY)-- z is the current bigAsteroid we are on
 	end
 end
