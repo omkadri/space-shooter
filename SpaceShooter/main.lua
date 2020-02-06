@@ -10,19 +10,33 @@ function love.load()
 		sprites.reticle = love.graphics.newImage('sprites/reticle.png')
 		sprites.asteroid1 = love.graphics.newImage('sprites/asteroid1.png')
 		sprites.asteroid2 = love.graphics.newImage('sprites/asteroid2.png')
-  
+		sprites.multishot = love.graphics.newImage('sprites/multishot.png')
+		sprites.shieldIcon = love.graphics.newImage('sprites/shieldIcon.png')
+		sprites.shieldEffect = love.graphics.newImage('sprites/shieldEffect.png')
+		sprites.health = love.graphics.newImage('sprites/health.png')
+		sprites.damage1 = love.graphics.newImage('sprites/damage1.png')
+		sprites.damage2 = love.graphics.newImage('sprites/damage2.png')
+		sprites.damage3 = love.graphics.newImage('sprites/damage3.png')
+	
+	success = love.window.setMode( 750, 900)
+
 	--sound
 	deathSFX = love.audio.newSource("sfx/death.ogg", "static")
 	bulletSFX = love.audio.newSource("sfx/bullet.ogg", "static")
 	
 	--calling external scripts
 	require ('asteroid')
+	require ('multishot')
+	require ('cooldown')
 	require ('bullet')
 	require ('player')
 	require ('scrollingBackground')
+	require ('health')
+	require ('powerUp')
+	
+	
 
 	--Game State Initialization
-	gameState = 2
 	maxTimeBetweenSpawn = 2
 	spawnTimer = maxTimeBetweenSpawn
 
@@ -32,29 +46,68 @@ function love.update(dt)
 	playerUpdate()
 	scrollingBackgroundUpdate()
 	bulletUpdate()
+	multishotUpdate()
 	asteroidUpdate()
+	powerUpUpdate()
+	cooldownUpdate()
+	healthUpdate()
 
-	--Game State Parameters
-	if gameState == 2 then
-		spawnTimer = spawnTimer - dt
-		if spawnTimer <= 0 then
-			spawnbigAsteroid(math.random(0, love.graphics:getWidth()), -30)
-			maxTimeBetweenSpawn = maxTimeBetweenSpawn * 0.97
-			spawnTimer = maxTimeBetweenSpawn
-		end
+	spawnTimer = spawnTimer - dt
+	if spawnTimer <= 0 then
+		spawnbigAsteroid(math.random(0, love.graphics:getWidth()), -30, math.random(-3, 3),math.random (1, 5))
+		spawnPowerUp(math.random(0, love.graphics:getWidth()), -30, math.random (1,15))
+		maxTimeBetweenSpawn = maxTimeBetweenSpawn * 0.99
+		spawnTimer = maxTimeBetweenSpawn
 	end
 
 end
 
 function love.draw()
 	drawScrollingBackground()
-	drawPlayer()
+	powerUpDraw()
 	drawBullet()
+	drawPlayer()
 	drawAsteroid()
+	drawmultishot()
+	drawCooldown()
+	drawHealth()
+
 	
 	--draws reticle
 	love.graphics.draw(sprites.reticle, love.mouse.getX(), love.mouse.getY(),nil, nil, nil, sprites.reticle:getWidth()/2, sprites.reticle:getHeight()/2)
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

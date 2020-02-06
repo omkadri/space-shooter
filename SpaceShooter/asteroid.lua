@@ -2,10 +2,12 @@ bigAsteroidTracker = {}
 
 smallAsteroidTracker = {}
 
-function spawnbigAsteroid(x, y)
+function spawnbigAsteroid(x, y, vx, vy)
 	bigAsteroid = {}
 		bigAsteroid.x = x
 		bigAsteroid.y = y
+		bigAsteroid.vectorX = vx
+		bigAsteroid.vectorY = vy
 		bigAsteroid.direction = 1
 		bigAsteroid.speed = 100
 		bigAsteroid.offsetX = sprites.asteroid1:getWidth()/2
@@ -16,11 +18,12 @@ function spawnbigAsteroid(x, y)
 	table.insert(bigAsteroidTracker, bigAsteroid)--adds this bigAsteroid table to the bigAsteroidTracker table in love.load()
 end
 
-function spawnSmallAsteroid(x, y, dir)
+function spawnSmallAsteroid(x, y, vx, vy)
 	smallAsteroid = {}
 		smallAsteroid.x = x
 		smallAsteroid.y = y
-		smallAsteroid.direction = dir
+		smallAsteroid.vectorX = vx
+		smallAsteroid.vectorY = vy
 		smallAsteroid.speed = 150
 		smallAsteroid.offsetX = sprites.asteroid2:getWidth()/2
 		smallAsteroid.offsetY = sprites.asteroid2:getHeight()/2--center bigAsteroid pivot point
@@ -30,52 +33,73 @@ function spawnSmallAsteroid(x, y, dir)
 end
 
 function asteroidUpdate()
-	--moves bigAsteroid towards player using trigonometry
+	--moves bigAsteroid towards player
 	for i,z in ipairs(bigAsteroidTracker) do
-		z.x = z.x + math.cos(math.random(1,2)) * z.speed * z.direction * dt
-		z.y = z.y + math.sin(math.random(1,2)) * z.speed * dt
+		z.x = z.x + z.vectorX * z.speed * z.direction * dt
+		z.y = z.y + z.vectorY * z.speed * dt
 		
 		--stops asteroids from leaving screen
 		if z.x <= 0 or z.x >= love.graphics:getWidth() then
 			z.direction = z.direction * -1
 		end
 		
-		if distanceBetween(z.x, z.y, player.x, player.y) < 30 then --this if condition also calls the function
+		if distanceBetween(z.x, z.y, player.x, player.y) < 70 then --this if condition also calls the function
 			for i,z in ipairs(bigAsteroidTracker) do
-				bigAsteroidTracker[i] = nil
+					if invulnerability == false then
+						invulnerability = true
+						healthLength = healthLength - 50
+						invulnerabilityTimer = 1
+					end
+				smallAsteroidTracker[i] = nil
 			end
 		end
-	end
-	
-	--moves smallAsteroid towards player using trigonometry
-	for i,z in ipairs(smallAsteroidTracker) do
-		if z.direction == 1 then
-			z.x = z.x + math.cos(math.random(1,2)) * z.speed * dt
-			z.y = z.y + math.sin(math.random(1,2)) * z.speed * dt
-		elseif z.direction == -1 then
-			z.x = z.x + math.cos(math.random(1,2)) * z.speed * -1 * dt  -- makes the 2nd asteroid move in another direction
-			z.y = z.y + math.sin(math.random(1,2)) * z.speed * dt
+		--stops asteroids from leaving screen
 		end
-		
+	
+	--moves smallAsteroid towards player
+	for i,z in ipairs(smallAsteroidTracker) do
+		z.x = z.x + z.vectorX * z.speed * dt
+		z.y = z.y + z.vectorY * z.speed * dt
+			
 		--stops asteroids from leaving screen
 		if z.x <= 0 or z.x >= love.graphics:getWidth() then
-			z.direction = z.direction * -1
+			z.vectorX = z.vectorX * -1
 		end
 		
-		
-		if distanceBetween(z.x, z.y, player.x, player.y) < 30 then --this if condition also calls the function
+		--collision with player
+		if distanceBetween(z.x, z.y, player.x, player.y) < 50 then --this if condition also calls the function
 			for i,z in ipairs(smallAsteroidTracker) do
+				if invulnerability == false then
+						invulnerability = true
+						healthLength = healthLength - 50
+						invulnerabilityTimer = 1
+					end
 				smallAsteroidTracker[i] = nil
 			end
 		end
 	end
 
 
-	
 	--this implements collision between bigAsteroid and bullets
 	for i, z in ipairs(bigAsteroidTracker) do
 		for j, b in ipairs(bulletTracker) do --using j because i is taken
 			if distanceBetween(z.x,z.y,b.x,b.y)	<60 then
+				b.despawn = true
+				deathSFX:play()
+				z.despawn = true
+			end	
+		end
+	end
+	
+		--this implements collision between bigAsteroid and multishot
+	for i, z in ipairs(bigAsteroidTracker) do
+		for j, b in ipairs(multishotTracker) do --using j because i is taken
+			if distanceBetween(z.x,z.y,b.x,b.y) < 60 then
+				b.despawn = true
+				deathSFX:play()
+				z.despawn = true
+			end	
+			if distanceBetween(z.x,z.y,b.x2,b.y2) < 60 then
 				b.despawn = true
 				deathSFX:play()
 				z.despawn = true
@@ -91,11 +115,25 @@ function asteroidUpdate()
 				deathSFX:play()
 				z.despawn = true
 				b.despawn = true
-				-- in another function, we destroy any bullets or bigAsteroids who's despawn = true
 			end	
 		end
 	end
 	
+		--this implements collision between smallAsteroid and multishot
+	for i, z in ipairs(smallAsteroidTracker) do
+		for j, b in ipairs(multishotTracker) do --using j because i is taken
+			if distanceBetween(z.x,z.y,b.x,b.y) < 60 then
+				b.despawn = true
+				deathSFX:play()
+				z.despawn = true
+			end	
+			if distanceBetween(z.x,z.y,b.x2,b.y2) < 60 then
+				b.despawn = true
+				deathSFX:play()
+				z.despawn = true
+			end	
+		end
+	end	
 
 	--destroy bigAsteroids
 	for i=#bigAsteroidTracker, 1, -1 do 
@@ -105,8 +143,8 @@ function asteroidUpdate()
 		if z.despawn == true then
 		
 			--spawn small asteroids
-			spawnSmallAsteroid(z.x, z.y, 1) --exact same velocity as big asteroid 
-			spawnSmallAsteroid(z.x, z.y, -1) --inverse x velocity
+			spawnSmallAsteroid(z.x, z.y, z.vectorX, z.vectorY) --exact same velocity as big asteroid 
+			spawnSmallAsteroid(z.x, z.y, (z.vectorX*-1), z.vectorY) --inverse x velocity
 			
 			
 			table.remove(bigAsteroidTracker, i) 
